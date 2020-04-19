@@ -1,0 +1,716 @@
+// globalnie nadany numer ligi
+	if (liga==null) {var liga = 1};
+	//var GFX = "http://baza.draftliga.pl/gfx"; //grafiki itd
+	var BAZA = 'http://baza.draftliga.pl/';
+	var GFX = BAZA+"gfx/"; //tymczasowo tak, żeby brało z folderu baza
+// drobne funkcje i globalne zmienne
+	//var wyzej; //jeżeli tworzymy element blokowy, który ma id (div, th, tr, td) to zapisuje się jako proponowany rodzic dla kolejnych elementów. w create jest też dodane, że jeśli dany obiekt został stworzony w proponowanym, to nie zapisuje się nowy 'wyżej' (tj tworzę kolejne td w wyżej)
+	function $id(id){
+		return document.getElementById(id);
+	}
+
+//funkcja do pobierania json, musi być na górze pliku
+	var getJSON = function (url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.responseType = 'json';
+		xhr.onload = function () {
+			var status = xhr.status;
+			if (status === 200) {
+				callback(xhr.response.data);
+			} else {
+//				callback(status, xhr.response);
+			console.log("err");
+			console.log(status);
+			return;
+			}
+		};
+		xhr.send();
+	};
+	//pobieramy json i wrzucamy do funkji viewOstatnie, nazwa funkcji jak ponizej bez zadnych cudzisłowiów bo tym razem to callback nie zmienna!!!
+	
+	// dodaj CSS
+	var styllink = document.createElement("link");
+	styllink.type = "text/css";
+	styllink.rel = "stylesheet";
+	styllink.href = BAZA+"styl.css";
+	document.head.appendChild(styllink);
+	
+	var styllinkliga = document.createElement("link");
+	styllinkliga.type = "text/css";
+	styllinkliga.rel = "stylesheet";
+	styllinkliga.href = BAZA+"stylliga"+liga+".css";
+	document.head.appendChild(styllinkliga);
+	//getJSON('http://baza.draftliga.pl/api/'+liga+'/mecz/862', viewMecz); // pokaz mecz
+	//getJSON('http://baza.draftliga.pl/api/'+liga+'/zawodnik/110', viewZaw); // pokaz zawodnika
+	//getJSON('http://baza.draftliga.pl/api/'+liga+'/druzyna/11/sumy', viewTeam); // pokaz druzyne (sumy)
+	//getJSON('http://baza.draftliga.pl/api/'+liga+'/druzyna/9/srednie', viewTeam); // pokaz druzyne (srednie)
+	// ODCZYTYWANIE PASKU ADRESU
+	//alert(location.search.split("?")[0].split("="));
+// ------------------------ URUCHOM ------------------------
+	var zapytania = location.search.split("&")[0].split("?");
+	if (zapytania.length<2) {
+		getJSON(BAZA + "api/" +liga+'/mecze', viewListaMecz);
+	} else {
+		//for (zapytanie in zapytania) {
+		var zapytanie = 1;
+	//		alert(zapytania[zapytanie]);
+			danezapytania = zapytania[zapytanie].split("=");
+			if (danezapytania[1]) {
+				switch (danezapytania[0].toLowerCase()) {
+					case "t": getJSON(BAZA + "api/" +liga+'/druzyna/'+danezapytania[1]+"/srednie", viewTeam); break;
+					case "ts": getJSON(BAZA + "api/" +liga+'/druzyna/'+danezapytania[1]+"/sumy", viewTeam); break;
+					case "z": getJSON(BAZA + "api/" +liga+'/zawodnik/'+danezapytania[1], viewZaw); break;
+					case "za": getJSON(BAZA + "api/zawodnik/"+danezapytania[1], viewZaw); break;
+					case "m": getJSON(BAZA + "api/" +liga+'/mecz/'+danezapytania[1], viewMecz); break;
+					default: getJSON(BAZA + "api/" +liga+'/mecze', viewListaMecz);
+				}
+			} else if (danezapytania) {
+				switch (danezapytania[0].toLowerCase()) {
+					case "t": getJSON(BAZA + "api/" +liga+'/listateam', viewListaTeam); break;
+					case "ts": getJSON(BAZA + "api/" +liga+'/listateam', viewListaTeam); break;
+					case "z": getJSON(BAZA + "api/" +liga+'/listazaw', viewListaZaw); break;
+					case "m": getJSON(BAZA + "api/" +liga+'/mecze', viewListaMecz); break;
+					default: getJSON(BAZA + "api/" +liga+'/mecze', viewListaMecz);
+				}
+			} else {
+				getJSON(BAZA + "api/" +liga+'/mecze', viewListaMecz);
+			}
+		// TRZEBA JESZCZE ROZSĄDNIE DOPISAĆ OBSŁUGĘ CO JAK ZŁA LITERA, CO JAK BRAK ZAPYTANIA
+		//}
+	}
+
+
+	var legenda = "legenda: <br>fg - rzuty z gry (za 2 i 3pkt) celne-oddane, 3p - rzuty za 3pkt, ft - rzuty wolne, reb - zbiórki, ast - asysty, stl - przechwyty, blk - bloki, pts - punkty<br>* - wyjście w pierwszej piątce, + - tzw box plus/minus - różnica w wyniku, kiedy zawodnik był na boisku (podane tylko dodatnie) / podane nie dla wszystkich meczów";
+
+//wyświetlanie
+// funkcje całościowe
+// tak się odczytuje dane jsonowe {}:	for (danysezon in sezony) ... sezony[danysezon]
+// wtedy danysezon to po prostu nazwa sezonu - "DC 36": {}
+// jeśli jest w środku ciąg [] to normalnie for (i=0;i<..length;i++)
+	
+	function viewListaZaw(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		var litera = ">"; // gdyby się trafił taki znak na początku alfabetu to go pominie chyyyba
+		var alfabet = "ABCĆDEFGHIJKLŁMNOPRSŚTUWZŹŻ".split('');
+		for (i in alfabet) {
+			createa("#kotwica_"+alfabet[i],"",okno,"",alfabet[i]+" ");		
+		}
+		for (i in json.zaw) {
+			if (json.zaw[i].litera !== litera) {
+				litera = json.zaw[i].litera;
+				//create("br","",okno);
+				create("a","kotwica_"+litera,okno,"","");
+				create("h3","",okno,"",litera);
+			}
+			if (json.zaw[i].nazwisko) {create("span","",okno,"",playerlinklista(json.zaw[i]))}
+		}
+	}
+	function viewListaTeam(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		for (i in json.teamy) {
+			if (json.teamy[i].tnazwa) {
+				createteamimg(json.teamy[i].team,okno,"listateam","",json.teamy[i].dywizja);
+				//createimg(GFX+"tl"+json.teamy[i].team+".png",okno,json.teamy[i].tnazwa,"stat?t="+json.teamy[i].team,"","listateam");
+			}
+		}
+	}
+	function viewListaMecz(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		create("div","divtabstat",okno); // wsadźmy tabelę w div container, żeby mieć ładne przewijanie. overflow-x
+			create("table","tabstat","divtabstat","xzaw");
+		for (sezon in json.sezony) {
+			create("tr","trnagl"+sezon,"tabstat");
+				create("td","tdnagl"+sezon,"trnagl"+sezon);
+					$id("tdnagl"+sezon).colSpan = 100;
+						create("h4","","tdnagl"+sezon,"",sezon);
+			for (dzien in json.sezony[sezon]){
+				if (Array.isArray(json.sezony[sezon][dzien])) {
+					var mecze = json.sezony[sezon][dzien];
+					create("tr","tr"+sezon+dzien,"tabstat");
+						create("td","","tr"+sezon+dzien,"nowrap",dzien);
+						create("td","td"+sezon+dzien,"tr"+sezon+dzien);
+					for (i in mecze) {
+						createmeczlink(mecze[i], "td"+sezon+dzien, "listalinkmecz");
+					}
+				}
+			}
+		}
+	}
+	function viewTeam(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		// nagłówki
+		create("h6","",okno,"",json.teamID);
+		/*
+		createimg(json.currentImage,okno,json.zawodnikID,"","f0.jpg");
+		create("div","zawtab",okno,"zawtab");
+			create("div","danezaw","zawtab","");
+				create("h3","","danezaw","",json.imie);
+				create("h1","","danezaw","",json.nazwisko);
+				create("h5","","danezaw","",json.wzrost);
+				create("h5","","danezaw","",json.rocznik);
+				create("h5","","danezaw","",json.szkola);
+				create("h5","","danezaw","",json.miasto);
+			create("div","trek","zawtab","trek","Rekordy<br>");
+				for (i in json.rekordy) {
+					create("div","","trek","",i+"<br><b>"+json.rekordy[i]);
+				}
+			create("br","","zawtab");
+			create("div","tnagr","zawtab","tnagr","");
+			*/
+			// nagrody są wyrzucone na koniec, żeby od razu je dodać do nagłówków sezonów
+		create("div","divtabstat",okno); // wsadźmy tabelę w div container, żeby mieć ładne przewijanie. overflow-x
+			create("table","tabstat","divtabstat","xzaw");
+			for (sezon in json.stat) {
+					create("tr","trnagl"+sezon,"tabstat");
+						create("td","tdnagl"+sezon,"trnagl"+sezon);
+							$id("tdnagl"+sezon).colSpan = 100;
+							create("h4","","tdnagl"+sezon,"",sezon);
+							//createimg(GFX+"tb"+json.stat[sezon].sezonID+json.teamID+".png","tdnagl"+sezon,""); // obrazek w naglowku druzynowym
+							create("h5","","tdnagl"+sezon,"",sezon.trener);
+					create("tr","trth"+sezon,"tabstat"); // naglowek statystyczny
+						create("th","","trth"+sezon,"","zawodnik");
+						create("th","","trth"+sezon,"prawa","g"); // mecze
+						create("th","","trth"+sezon,"prawa",""); // s5
+						create("th","","trth"+sezon,"",""); // minuty
+						createstatlineth("trth"+sezon); // standardowy statline th
+					for (zawodnik in json.stat[sezon].zawodnicy) {
+						var danezaw = json.stat[sezon].zawodnicy[zawodnik];
+						create("tr","tr"+sezon+danezaw.zawodnikID,"tabstat","stat");
+							create("td","","tr"+sezon+danezaw.zawodnikID,"lewa",playerlink(danezaw));
+							create("td","","tr"+sezon+danezaw.zawodnikID,"prawa",danezaw.mecze);
+							create("td","","tr"+sezon+danezaw.zawodnikID,"prawa",((danezaw.s5>0)?danezaw.s5:"")); //((danezaw.s5>0)?danezaw.s5:"")); // narazie nie pokazujemy temp
+							create("td","","tr"+sezon+danezaw.zawodnikID,"prawa",""); // minuty
+							createstatline(danezaw,"tr"+sezon+danezaw.zawodnikID,(json.resultType == "avg")); // dodany warunek do f.tymcz. do zmiany dokładności średnich
+					}	
+
+						// sumy sezonu
+						create("tr","trsumy"+sezon,"tabstat","sumy");
+							create("td","tdiloscmeczow"+sezon,"trsumy"+sezon,"","Mecze: "+json.stat[sezon].total.mecze); // nie mamy ilości meczów
+							$id("tdiloscmeczow"+sezon).colSpan = 4;
+							createstatline(json.stat[sezon].total,"trsumy"+sezon,(json.resultType == "avg")); // dodany warunek do f.tymcz. do zmiany dokładności średnich
+						// średnie
+						 // póki co zamiast średnich idzie tylko procent w obu przypadkach
+							create("tr","trsrednie"+sezon,"tabstat","srednie");
+							create("td","tdiloscmeczowsr"+sezon,"trsrednie"+sezon,"","");
+							$id("tdiloscmeczowsr"+sezon).colSpan = 4;
+							createsrednie(json.stat[sezon].total,"trsrednie"+sezon,(json.resultType == "avg"));
+						/*
+						// tylko procenty
+						create("tr","trsrednie"+sezon,"tabstat","srednie");
+						create("td","tdiloscmeczowsr"+sezon,"trsrednie"+sezon,"","");
+						$id("tdiloscmeczowsr"+sezon).colSpan = 4;
+						createsrednie(json.stat[sezon].total,"trsrednie"+sezon,true); //true czyli tylko procenty
+						*/
+					
+			}
+		// koniec sezonów, sumy dywizji i total?:
+		/*
+		create("tr","trthlacznie","tabstat"); // naglowek statystyczny
+			create("td","tdlacznie","trthlacznie");
+				create("h4","","tdlacznie","","Total:");
+			create("th","","trthlacznie","",""); // s5
+			create("th","","trthlacznie","",""); // +/-
+			create("th","","trthlacznie","",""); // minuty
+			createstatlineth("trthlacznie"); // standardowy statline th
+		for (dywizja in json.stat) {
+			if (dywizja !== "total") {
+				// tytul i sumy
+				create("tr","trsumylacznie"+dywizja,"tabstat","sumy");
+					create("td","tdiloscmeczow"+dywizja,"trsumylacznie"+dywizja,"",dywizja+": Mecze: "+json.stat.dywizje[dywizja].total.mecze);
+					$id("tdiloscmeczow"+dywizja).colSpan = 4;
+					createstatline(json.stat.dywizje[dywizja].total,"trsumylacznie"+dywizja);
+				// średnie
+				create("tr","trsrednie"+dywizja,"tabstat","srednie");
+					create("td","tdiloscmeczowsr"+dywizja,"trsrednie"+dywizja,"","");
+					$id("tdiloscmeczowsr"+dywizja).colSpan = 4;
+					createsrednie(json.stat.dywizje[dywizja].total,"trsrednie"+dywizja);
+			}
+		}
+		*/
+		// cała strona utworzona, dodawanie elementów
+		/*
+		for (i in json.nagrody) {
+			createnagroda(json.nagrody[i],"tnagr");
+			if (json.nagrody[i].seznazwa) {createnagroda(json.nagrody[i],"tdnagl"+json.nagrody[i].seznazwa)}; // nagrody przy sezonach
+		}
+		*/
+			
+	}
+	
+	function viewZaw(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		// nagłówki
+		create("h6","",okno,"","<a href=http://warsawbasketball.com/a/stat?z="+json.zawodnikID+">"+json.zawodnikID+"</a>");
+		create("div","zawfoto",okno);
+			createimg(json.currentImage,"zawfoto",json.zawodnikID,json.currentImage,"f0.jpg");
+			if (json.images.length) { // jeśli są inne zdjęcia to tworzymy podglądy
+				create("br","","zawfoto");
+				create("div","zawfotoslider","zawfoto");
+				for (i in json.images) {
+					createimg(json.images[i],"zawfotoslider",json.zawodnikID,json.images[i]);
+				}
+			}
+		create("div","zawtab",okno,"zawtab");
+			create("div","danezaw","zawtab","");
+				create("h2","","danezaw","",json.imie);
+				create("h1","","danezaw","",json.nazwisko);
+				var wartosci = [json.wzrost,(liga==7?"":json.rocznik),json.szkola,json.miasto]; 
+				for (wart in wartosci) {
+					if (wartosci[wart]>0) {create("h5","","danezaw","",wartosci[wart])};
+				}
+			create("br","","zawtab");
+			create("div","tnagr","zawtab","tnagr","");
+			// nagrody są wyrzucone na koniec, żeby od razu je dodać do nagłówków sezonów
+			create("div","trek","zawtab","trek","Rekordy<br>");
+				for (i in json.rekordy) {
+					create("div","","trek","",i+"<br><b>"+json.rekordy[i]);
+				}
+		create("div","divtabstat",okno); // wsadźmy tabelę w div container, żeby mieć ładne przewijanie. overflow-x
+			create("table","tabstat","divtabstat","xzaw");
+				//for (dywizja in json.stat) {
+					//if (dywizja!=="total") {
+						for (sezon in json.stat.sezony) {
+							var danesezonu = json.stat.sezony[sezon];
+								create("tr","trnagl"+sezon,"tabstat");
+									create("td","tdnagl"+sezon,"trnagl"+sezon,"tdnagl");
+										$id("tdnagl"+sezon).colSpan = 100;
+										create("h2","nrkosz"+sezon,"tdnagl"+sezon,"inline");
+										createteamimg(danesezonu.teamID,"tdnagl"+sezon,"","",danesezonu.dywizja);
+										//createimg(GFX+"tl"+danesezonu.teamID+".png","tdnagl"+sezon,"","stat?t="+danesezonu.teamID); // obrazek w naglowku druzynowym
+										create("b","","tdnagl"+sezon,"","&nbsp;&nbsp;"+sezon);
+										create("div","nagr"+sezon.split(" - ")[1],"tdnagl"+sezon);
+								create("tr","trth"+sezon,"tabstat"); // naglowek statystyczny
+									create("th","","trth"+sezon,"","mecz");
+									create("th","","trth"+sezon,"",""); // s5
+									create("th","","trth"+sezon,"",""); // +/-
+									create("th","","trth"+sezon,"",""); // minuty
+									createstatlineth("trth"+sezon); // standardowy statline th
+								for (mecz in danesezonu.mecze) {
+									var danemeczu = danesezonu.mecze[mecz];
+									if (mecz==0) {$id("nrkosz"+sezon).innerHTML = danemeczu.zawnr}
+									create("tr","tr"+danemeczu.meczID,"tabstat","stat");
+										create("td","","tr"+danemeczu.meczID,"lewa",meczlink(danemeczu));
+										createpelnystatline(danemeczu,"tr"+danemeczu.meczID);
+										create("td","tdpasek"+danemeczu.meczID,"tr"+danemeczu.meczID,"tdpasek","");
+											createpasekmvp(danemeczu,"tdpasek"+danemeczu.meczID,danesezonu.teamkolor);
+								}	
+								// sumy sezonu
+								create("tr","trsumy"+sezon,"tabstat","sumy");
+									create("td","tdiloscmeczow"+sezon,"trsumy"+sezon,"","Mecze: "+danesezonu.total.mecze);
+									$id("tdiloscmeczow"+sezon).colSpan = 4;
+									createstatline(danesezonu.total,"trsumy"+sezon);
+								// średnie
+								create("tr","trsrednie"+sezon,"tabstat","srednie");
+									create("td","tdiloscmeczowsr"+sezon,"trsrednie"+sezon,"","");
+									$id("tdiloscmeczowsr"+sezon).colSpan = 4;
+									createsrednie(danesezonu.total,"trsrednie"+sezon);
+							//}
+						}
+					//}
+				//}
+			// koniec sezonów, sumy dywizji i total?:
+				create("tr","trsekcjasumy","tabstat"); // naglowek statystyczny
+					create("td","tdlacznie","trsekcjasumy","","<h3>Sumy</h3>");
+				create("tr","trthlacznie","tabstat"); // naglowek statystyczny
+					create("td","tdlacznie","trthlacznie","","");
+					create("th","","trthlacznie","",""); // s5
+					create("th","","trthlacznie","",""); // +/-
+					create("th","","trthlacznie","",""); // minuty
+					createstatlineth("trthlacznie"); // standardowy statline th
+				for (dywizja in json.stat.dywizje) {
+					if (dywizja !== "total") {
+						// tytul i sumy
+						create("tr","trsumylacznie"+dywizja,"tabstat","sumy");
+							create("td","tdiloscmeczow"+dywizja,"trsumylacznie"+dywizja,"",dywizja+": Mecze: "+json.stat.dywizje[dywizja].total.mecze);
+							$id("tdiloscmeczow"+dywizja).colSpan = 4;
+							createstatline(json.stat.dywizje[dywizja].total,"trsumylacznie"+dywizja);
+						// średnie
+						create("tr","trsrednie"+dywizja,"tabstat","srednie");
+							create("td","tdiloscmeczowsr"+dywizja,"trsrednie"+dywizja,"","");
+							$id("tdiloscmeczowsr"+dywizja).colSpan = 4;
+							createsrednie(json.stat.dywizje[dywizja].total,"trsrednie"+dywizja);
+					}
+				}
+				//sumy total
+				if (json.stat.total) {
+				create("tr","trsekcjasumysum","tabstat"); // naglowek statystyczny
+					create("td","tdlacznie","trsekcjasumysum","","<h3>\u0141\u0104CZNIE</h3>");
+				create("tr","trsumylacznie","tabstat","sumy");
+					create("td","tdiloscmeczow","trsumylacznie","","Mecze: "+json.stat.total.mecze);
+					$id("tdiloscmeczow").colSpan = 4;
+					createstatline(json.stat.total,"trsumylacznie");
+				// średnie
+				create("tr","trsrednie","tabstat","srednie");
+					create("td","tdiloscmeczowsr","trsrednie","","");
+					$id("tdiloscmeczowsr").colSpan = 4;
+							createsrednie(json.stat.total,"trsrednie");
+				}
+		create("h6","",okno,"",legenda);
+		// cała strona utworzona, dodawanie elementów
+		for (i in json.nagrody) {
+			createnagroda(json.nagrody[i],"tnagr");
+			if ($id("nagr"+json.nagrody[i].seznazwa)) {createnagroda(json.nagrody[i],"nagr"+json.nagrody[i].seznazwa);} // nagrody przy sezonach 
+		}
+		
+		
+	}
+
+
+	function viewMecz(json) {
+		var okno = "zawartosc"; //główne "okno", w którym będzie zawartość
+		// opracowanie danych
+		
+		// nagłówki
+		create("h6","",okno,"",[json.meczID,json.date].join(" "));
+		create("h5","",okno,"",json.sezon.nazwa);
+		create("h2","",okno,"",naglowekmeczu(json));
+		create("h3","",okno,"",json.headline);
+		create("p","",okno,"",json.opis);
+		if (json.youtube) {
+			create("iframe","yt",okno);
+			$id("yt").src = "https://www.youtube-nocookie.com/embed/" + json.youtube;
+			$id("yt").setAttribute('frameBorder', '0');
+			$id("yt").setAttribute('allowFullScreen', '');
+			$id("yt").webkitAllowFullScreen = true;
+		}
+		if (json.kwarty) {
+			create("div","divkwarty",okno,"divprzewij");
+				create("table","","divkwarty","kwarty",tabelkakwart(json.kwarty));
+		}
+		if (json.wykres) { // nowy wykres
+			// ustalenie czy drużyna wynik0 to drużyna0
+			var kolor1 = json.wynik.druzyna1.kolor;
+			var kolor2 = json.wynik.druzyna2.kolor;
+			/*for (druzyna in json.stat) {
+				if (druzyna !== json.wynik.druzyna1.team) {
+					kolor1 = json.wynik.druzyna2.kolor;
+					kolor2 = json.wynik.druzyna1.kolor;
+				}
+				break;
+			}*/ // powyższe jest niepotrzebne, bo kolory są brane z wynik-druzyna1,2. a ta kolejność się zgadza z kolejnością w rekordzie w tabeli MECZ
+			
+			//
+			create("div","divwykres",okno,"divprzewij");
+				create("table","tabwykres","divwykres","kwarty zeropad ");
+					for (i=0;i<2;i++) {
+					create("tr","trwykres"+i,"tabwykres");
+						create("td","td"+i,"trwykres"+i);
+					}
+					var bloki = json.wykres.match(/.{2}/g);
+					var wys = 0;
+					var szer = 0;
+					var skalaszer = 2;
+					var skalawys = 7;
+					var klasabloku = "";
+					for (i=1;i<bloki.length;i++) {
+						wys = bloki[i].charCodeAt(0)-64;
+						szer = bloki[i].charCodeAt(1)-64;
+						if ( (wys==0)&&(szer==0) ) { // oznaczenie nowej kwarty. narazie próba z wysokim divem w kolorze jakimś. (koniec kwarty jest zapisywany w wykresie jako 0,0)
+							klasabloku = "wykreskwartadiv";
+						} else {klasabloku = ""}
+						create("div","d0_"+i,"td0",klasabloku,"");
+						create("div","d1_"+i,"td1",klasabloku,"");
+						$id("d0_"+i).style.width = skalaszer*szer+"px";
+						$id("d1_"+i).style.width = skalaszer*szer+"px";
+						if (wys>=0) {
+							$id("d1_"+i).style.backgroundColor = kolor2;
+							$id("d1_"+i).style.height = skalawys*Math.min(32,wys)+"px";
+						} else {
+							$id("d0_"+i).style.backgroundColor = kolor1;
+							$id("d0_"+i).style.height = skalawys*Math.min(32,-wys)+"px";
+						}
+					}
+		} else if (json.diagram) {createimg(json.diagram,okno)}
+		// liderzy game high
+		create("div","divgamehigh",okno,"divprzewij");
+			create("table","tabgamehigh","divgamehigh","kwarty");
+				for (druzyna in json.stat) {
+					var danedruzyny = json.stat[druzyna];
+					create("tr","trgamehigh"+druzyna,"tabgamehigh");
+						create("td","","trgamehigh"+druzyna,"",druzyna.substr(0,3).toUpperCase())
+						for (kat in danedruzyny.liderzy) {
+							create("td","","trgamehigh"+druzyna,"",(Array.isArray(danedruzyny.liderzy[kat].fullname)?danedruzyny.liderzy[kat].fullname.join("<br>"):(danedruzyny.liderzy[kat].fullname)))
+							create("td","","trgamehigh"+druzyna,"",danedruzyny.liderzy[kat].value+kat)
+						}
+				}			
+		// statsy
+		create("div","divtabstat",okno,"divprzewij"); // wsadźmy tabelę w div container, żeby mieć ładne przewijanie. overflow-x
+			create("table","tabstat","divtabstat","xzaw");
+		for (druzyna in json.stat) {
+			var danedruzyny = json.stat[druzyna];
+			create("tr","tr"+druzyna,"tabstat"); //naglowek druzynowy
+				create("td","tdnagl"+druzyna,"tr"+druzyna,"lewa");
+					$id("tdnagl"+druzyna).colSpan = 2;
+					createteamimg(danedruzyny.teamID,"tdnagl"+druzyna,"","",json.dywizja.id);
+					//createimg(GFX+"tl"+danedruzyny.teamID+".png","tdnagl"+druzyna,druzyna,"stat?t="+danedruzyny.teamID); // obrazek w naglowku druzynowym
+			create("tr","trth"+druzyna,"tabstat"); // naglowek statystyczny
+				create("th","","trth"+druzyna,"","nr");
+				create("th","","trth"+druzyna,"","zawodnik");
+				create("th","","trth"+druzyna,"",""); // s5
+				create("th","","trth"+druzyna,"",""); // +/-
+				create("th","","trth"+druzyna,"",""); // minuty
+				createstatlineth("trth"+druzyna); // standardowy statline th
+			for (i=0;i<danedruzyny.zawodnicy.length;i++){ //wiersz zawodnika
+			var danezaw = danedruzyny.zawodnicy[i];
+				create("tr","tr"+druzyna+i,"tabstat","stat");
+					create("td","","tr"+druzyna+i,"num",danezaw.numerKoszulki);
+					create("td","","tr"+druzyna+i,"lewa",( (danezaw.zawodnikID<1) || (isNaN(danezaw.zawodnikID)) )?danezaw.zawodnikID:playerlink(danezaw)); // jeżeli id nie jest liczbą >0 to nie robi linka tylko podaje id (które może być np nazwiskiem?)
+					createpelnystatline(danezaw,"tr"+druzyna+i,0);
+			}
+			create("tr","trsumy"+druzyna,"tabstat","sumy"); // sumy drużyny
+				create("td","pusty"+druzyna,"trsumy"+druzyna);
+				$id("pusty"+druzyna).colSpan = 5;
+				createstatline(danedruzyny.total,"trsumy"+druzyna); // standardowy statline sumy
+			create("tr","trproc"+druzyna,"tabstat","proc"); // procenty drużyny
+				create("td","pusty2"+druzyna,"trproc"+druzyna);
+				$id("pusty2"+druzyna).colSpan = 5;
+				for (i in danedruzyny.procent) {create("td","","trproc"+druzyna,"prawa",(danedruzyny.procent[i]==null)?"-":danedruzyny.procent[i]+"%")}
+		}
+		create("h6","",okno,"",legenda);
+	}
+	
+	
+	// robi dowolny element. TYP, ID, PARENT, ew CLASS
+	function create(typ,id,rodzic,klasa,srodek) {
+		var tmp = document.createElement(typ);
+		if (id) {tmp.id = id}
+		if (klasa) {tmp.className += " "+klasa}
+		if (srodek !== undefined) {tmp.innerHTML = srodek} // czyli zero będzie wyświetlane
+		$id(rodzic).appendChild(tmp);
+//		if ((rodzic!==wyzej)&&(id)) {rodzic==id}
+	}
+	function createa(href,id,rodzic,klasa,srodek) {
+		var tmp = document.createElement("a");
+		tmp.href = href;
+		if (id) {tmp.id = id}
+		if (klasa) {tmp.className += " "+klasa}
+		if (srodek !== undefined) {tmp.innerHTML = srodek} // czyli zero będzie wyświetlane
+		$id(rodzic).appendChild(tmp);
+//		if ((rodzic!==wyzej)&&(id)) {rodzic==id}
+	}
+	function createteamimg(teamid,rodzic,klasa,bezlinka,dywizja){
+		var tmpimg = document.createElement("img");
+		tmpimg.title = teamid;
+		if (dywizja) {
+			tmpimg.src = GFX+"tl"+teamid+"_"+dywizja+".png"
+			tmpimg.onerror = function() {
+				this.src = GFX+"tl"+teamid+".png";
+				this.onerror = "";
+			}
+		} else {
+			tmpimg.src = GFX+"tl"+teamid+".png";
+		}
+		if (klasa) {tmpimg.className += " "+klasa}
+		if (!bezlinka) {
+			var tmpa = document.createElement("a");
+			tmpa.href = "stat?t="+teamid;
+			$id(rodzic).appendChild(tmpa);
+			tmpa.appendChild(tmpimg);
+		} else {
+			$id(rodzic).appendChild(tmpimg);
+		}
+	}
+	function createimg(sciezka,rodzic,tytul,link) {
+		var tmpimg = document.createElement("img");
+		tmpimg.src = sciezka;
+		if (tytul) {tmpimg.title = tytul}
+		if (link) {
+			var tmpa = document.createElement("a");
+			tmpa.href = link;
+			$id(rodzic).appendChild(tmpa);
+			tmpa.appendChild(tmpimg);
+		} else {
+			$id(rodzic).appendChild(tmpimg);
+		}
+	}
+/*	function createteamimg(teamid,rodzic,klasa,bezlinka,dywizja){
+		var tmpimg = document.createElement("img");
+		tmpimg.title = teamid;
+		if (dywizja) {
+			tmpimg.src = GFX+"tl"+teamid+"_"+dywizja+".png"
+			tmpimg.onerror = function() {
+				this.src = GFX+"tl"+teamid+".png";
+				this.onerror = "";
+			}
+		} else {
+			tmpimg.src = GFX+"tl"+teamid+".png";
+		}
+		if (!bezlinka) {
+			var tmpa = document.createElement("a");
+			tmpa.href = "stat?t="+teamid;
+			$id(rodzic).appendChild(tmpa);
+			tmpa.appendChild(tmpimg);
+		} else {
+			$id(rodzic).appendChild(tmpimg);
+		}
+		if (klasa) {tmpimg.className += " "+klasa}
+	}
+	function createimg(sciezka,rodzic,tytul,link,dodid,klasa) {
+		var tmpimg = document.createElement("img");
+		tmpimg.src = sciezka;
+		if (tytul) {tmpimg.title = tytul}
+		if (link) {
+			var tmpa = document.createElement("a");
+			tmpa.href = link;
+			$id(rodzic).appendChild(tmpa);
+			tmpa.appendChild(tmpimg);
+		} else {
+			$id(rodzic).appendChild(tmpimg);
+		}
+		if (dodid) {tmpimg.id = dodid}
+		if (klasa) {tmpimg.className += " "+klasa}
+	}
+*/
+/*	function createimg(sciezka,rodzic,tytul,link,iferr,klasa) {
+		var tmpimg = document.createElement("img");
+		tmpimg.src = sciezka;
+		if (tytul) {tmpimg.title = tytul}
+		if (klasa) {tmpimg.className += " "+klasa}
+		if (link) {
+			var tmpa = document.createElement("a");
+			tmpa.href = link;
+			$id(rodzic).appendChild(tmpa);
+			tmpa.appendChild(tmpimg);
+		} else {
+			$id(rodzic).appendChild(tmpimg);
+		}
+		//if (iferr) {tmpimg.onerror = function(){if (this.src !== GFX+iferr) {this.src = GFX+iferr} else {this.display = "none"}}}//raz sprawdź, że jeżeli nie ma obrazka to ustaw p0 // narazie wyłączone, bo online coś świruje. wychodzi mu zawsze inna nazwa i jak nie ma pliku to szuka w nieskończoność
+	
+	}
+	*/
+	function createstatlineth(rodzic) { // nagłowki standardowego statline: od fg do pts
+		var statlineth = ["fg","3p","ft","reb","ast","stl","blk","pts"];
+		for (j in statlineth) {
+			create("th","",rodzic,"prawa",statlineth[j]);
+		}
+	}
+	function createstatline(zrodlo,rodzic,avgp) { //standardowy statline: od fgm-fga do pts // AVG jest tylko do f.tymczasowej poniżej!
+		var statlinepoz = [["fgm","fga"],["pm3","pa3"],["ftm","fta"],"reb","ast","stl","blk","pts"];
+					// uwaga! funkcja tymczasowa:
+					//ponieważ api daje dokł do 2 miejsc i bez zer trail, to musimy dać oddzielną funkcję, póki ktoś tego nie naprawi
+					// 2.10 api daje już do 1 miejsca, ale nadal bez zer trail, więc poniższe zostaje:
+					if (avgp) {
+						for (j in zrodlo) {
+							if (!isNaN(zrodlo[j])) {
+									zrodlo[j] = (zrodlo[j]*1).toFixed(1);
+								}
+						}
+					}
+					
+					// koniec
+		for (j in statlinepoz) {
+			if (Array.isArray(statlinepoz[j])) { // jeżeli więcej niż jedna wartość to łączone myślnikiem
+				var wartosci = [];
+				for (k=0;k<statlinepoz[j].length;k++) {wartosci.push(zrodlo[statlinepoz[j][k]])}
+				create("td","",rodzic,"prawa",wartosci.join("-"))
+			} else {
+				create("td","",rodzic,"prawa",zrodlo[statlinepoz[j]]); // po co tu była klasa "td"+statlinepoz[j] wpisana?
+			}
+		}
+	}
+	function createsrednie(zrodlo,rodzic,tylkoprocenty) { //standardowy statline: od fgm-fga do pts
+		var statlinepoz = [["fgm","fga"],["pm3","pa3"],["ftm","fta"],"reb","ast","stl","blk","pts"];
+		for (j in statlinepoz) {
+			if (Array.isArray(statlinepoz[j])) { // jeżeli więcej niż jedna wartość to procent
+				//var procent = ;
+				create("td","",rodzic,"prawa",((zrodlo[statlinepoz[j][1]]>0)?Math.round(100*zrodlo[statlinepoz[j][0]]/zrodlo[statlinepoz[j][1]])+"%":"-")) // pokazuje procent jeśli więcej niż 0 oddanych)
+			} else {
+				if (!tylkoprocenty) {create("td","",rodzic,"prawa",(zrodlo[statlinepoz[j]]/zrodlo.mecze).toFixed(1))};
+			}
+		}
+	}
+	function createpelnystatline(zrodlo,rodzic) { //statline rozszerzony o s5, +/-, min
+		create("td","",rodzic,"s5",(zrodlo.s5==1)?"*":""); // (warunek)?true:false
+		create("td","",rodzic,"s5",(zrodlo.pm>0)?"+"+zrodlo.pm:"");
+		create("td","",rodzic,"s5",/*(zrodlo.minut>0)?zrodlo.minut+"'":*/""); // póki co nie pokazujemy minut
+		//create("td","","tr"+druzyna+i,"",(danedruzyny.zawodnicy[i].minut>0)?danedruzyny.zawodnicy[i].minut:""); // tak mają być później minuty
+		createstatline(zrodlo,rodzic);	
+	}
+	function createnagroda(zrodlo,rodzic){
+		//json.nagrody[i]
+		createimg(GFX+"n"+zrodlo.typ+".png",rodzic,zrodlo.opisn + " " + zrodlo.seznazwa);
+	}
+	function createpasekmvp(zrodlo,rodzic,kolor){
+		var mnoznik = 2; //evale są przeważnie do 30, rekordowych kilka ok 70
+		//if (!kolor) {kolor = 0} // stara wersja paska
+		create("img","EVAL"+zrodlo.meczID,rodzic);
+		//$id("EVAL"+zrodlo.meczID).src = GFX+"p"+kolor+".png"; // stara wersja paska
+		$id("EVAL"+zrodlo.meczID).src = GFX+"p0.png";
+		$id("EVAL"+zrodlo.meczID).style.width = Math.max(3,3+mnoznik*mvpformula(zrodlo))+"px"; 
+		$id("EVAL"+zrodlo.meczID).style.height = "1.2em";
+		$id("EVAL"+zrodlo.meczID).style.marginLeft = "3px";
+		if (kolor) {$id("EVAL"+zrodlo.meczID).style.backgroundColor = kolor}	// nowa wersja paska, przezroczyste "3d" i tło w kolorze drużyny wziętym z jsona
+		$id("EVAL"+zrodlo.meczID).onerror = function(){if (this.src !== GFX+"p0.png") {this.src = GFX+"p0.png"};}; //raz sprawdź, że jeżeli nie ma obrazka to ustaw p0
+	}
+	
+	function playerlink(zrodlo) {
+		return ("<a href=stat?z="+zrodlo.zawodnikID+">"+zrodlo.imie+" "+zrodlo.nazwisko+"</a>");
+	}
+	function createmvplink(zrodlo,rodzic,klasa) {
+		var tmpa = document.createElement("a");
+		tmpa.href = "stat?z="+zrodlo.zawodnikID;
+		tmpa.innerHTML = "<a href=stat?z="+zrodlo.zawodnikID+"><img src="+zrodlo.image+"> "+zrodlo.imie+" "+zrodlo.nazwisko+"</a>"
+		if (klasa) {tmpa.className += " "+klasa}
+		$id(rodzic).appendChild(tmpa);		
+	}
+	function playerlinkfoto(zrodlo) {
+		return ("<a href=stat?z="+zrodlo.zawodnikID+"><img src="+zrodlo.image+"> "+zrodlo.imie+" "+zrodlo.nazwisko+"</a>");
+	}
+	function playerlinklista(zrodlo) {
+		return ("<a class=listalinkzaw href=stat?z="+zrodlo.zid+">"+zrodlo.nazwisko+", "+zrodlo.imie+"</a> ");
+	}
+	function meczlink(zrodlo){
+		return ("<a href=stat?m="+zrodlo.meczID+">"+zrodlo.mecz+"</a>");
+	}
+	function createmeczlink(zrodlo, rodzic, klasa) {
+		var tmpa = document.createElement("a");
+		tmpa.href = "stat?m="+zrodlo.meczID;
+		tmpa.innerHTML = naglowekmeczu(zrodlo);
+		if (klasa) {tmpa.className += " "+klasa}
+		$id(rodzic).appendChild(tmpa);
+	}
+	function naglowekmeczu(zrodlo) {
+		//if (zrodlo.przedrostek=="D-League") { // jeśli d-league to nie podajemy wyniku
+		if (zrodlo.przedrostek.toLowerCase().indexOf("d-league")>-1) { // jeśli d-league to nie podajemy wyniku
+			return zrodlo.przedrostek;
+		} else if (zrodlo.wynik1) { // jeżeli to json listy
+			return zrodlo.przedrostek + " " + zrodlo.druzyna1+" "+zrodlo.wynik1+":"+zrodlo.wynik2+" "+zrodlo.druzyna2;
+		} else if (zrodlo.wynik) { // jeżeli to json meczu
+			var counter = 0;
+			var druzyny = [];
+			var wyniki = [];
+			for (i in zrodlo.stat) {
+				druzyny.push(i);
+				wyniki.push(zrodlo.stat[i].total.pts);
+				counter++;
+				if (counter>1) {break}
+			}
+			return zrodlo.przedrostek + " " + druzyny[0].replace(" ","&nbsp;")+" "+wyniki[0]+(druzyny[1]?":"+wyniki[1]+" "+druzyny[1].replace(" ","&nbsp;"):"");
+		} else {
+			return zrodlo.meczID;
+		}
+	}
+	function tabelkakwart(zrodlo){
+		var mieso = "<tr>";
+		var dane = zrodlo.split(",");
+		for (i in dane) {
+			mieso += "<td>"+dane[i]+"</td>";
+			if (isNaN(dane[i*1+1])) {mieso += "</tr><tr>"}
+		}
+		mieso += "</tr>";
+		return mieso;
+	}
+	function mvpformula(zrodlo){
+		return 1*zrodlo.pts + 1*zrodlo.reb + 1.5*zrodlo.ast + 1*zrodlo.stl + 1*zrodlo.blk - 0.4*(zrodlo.fga-zrodlo.fgm);
+	}
+/*	function createplayerlink(zrodlo,rodzic) {
+		console.log("z"+zrodlo.zawodnikID);
+		console.log("<a href=stat?z="+zrodlo.zawodnikID+">"+zrodlo.imie+" "+zrodlo.nazwisko+">");
+		var tmpa = document.createElement("a");
+		tmpa.href = "stat?z="+zrodlo.zawodnikID;
+		tmpa.innerHTML = zrodlo.imie+" "+zrodlo.nazwisko;
+		$id(rodzic).appendChild(tmpa);
+	}
+*/
+	//robi paragraf ze strong

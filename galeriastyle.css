@@ -1,0 +1,42 @@
+.gallery
+{
+    margin-left: 17%
+}
+
+.gallery img 
+{
+    transition:1s;
+    width: 20%;
+    margin-right: 1px;
+    border: 10px solid transparent;
+    padding: 15px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+
+.gallery img:hover 
+{
+    filter: brightness(120%);
+    transform: scale(1.1);
+}
+
+@media (max-width:800px)				
+{
+.gallery img
+	{
+	width: 40%;
+	}
+}
+
+@media (max-width: 500px)
+{
+.gallery img 
+{
+    width:100%;
+
+}
+.gallery
+    {
+        margin-left:0%;
+    }
+}

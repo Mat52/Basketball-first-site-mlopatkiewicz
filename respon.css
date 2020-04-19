@@ -1,0 +1,60 @@
+@media (max-width:800px)				
+{
+ol > li
+	{
+	width: 50%;
+	}
+}
+
+@media (max-width: 500px)
+{
+ol > li
+{
+    width:100%;
+
+}
+}
+ 
+media (max-width:800px)				
+{
+iframe
+    {
+	width: 100%;
+    }
+}
+img.insta
+    {
+        padding-bottom: 3%
+    }
+
+}
+
+@media (max-width:800px)				
+{
+ol > li 
+{
+	width: 50%;
+}
+}
+
+@media (max-width: 500px)
+{
+ol > li 
+{
+    width:100%;
+
+}
+    
+img.insta
+    {
+        padding-bottom: 3%
+    }
+}
+
+ header img 
+ {
+	width: 100%;
+	display: block; 
+	
+ }
+

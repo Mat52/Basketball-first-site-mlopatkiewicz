@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="PL">
+<head>
+	<meta charset="UTF-8"> <!-- polskie znaki-->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- dla urządzeń mobilnych-->
+	<title>Mateusz Łopatkiewicz</title> <!-- Wynik wyszukiwania nazwa strony -->
+	<link href="https://fonts.googleapis.com/css?family=Cinzel&display=swap&subset=latin-ext" rel="stylesheet">  <!-- dodanie czcionki -->
+	<link href="Zdjecia/favicon.ico" rel="icon" type="image/x-icon" />	<!-- favvicon -->
+	<link rel="stylesheet" href="stylestaty.css">
+	<link rel="stylesheet" href="respon.css">
+	<link rel="stylesheet" type="text/css" href="Lightbox/css/lightbox.css"> 
+    <script type="text/javascript" src="Lightbox/js/lightbox-plus-jquery.min.js"></script>
+
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="responsiveslides.min.js"></script>
+
+	<script>
+  		$(function() {
+    	$(".rslides").responsiveSlides();
+  	});
+	</script>
+
+</head>
+
+<body>
+	<div id="wrapper"> <!-- Główny kontener z id main -->
+		<header> <!-- nagłówek strony -->
+				<ul class="rslides">
+  			<li><img src="Zdjecia/basketball.jpg" alt=""></li>
+  			<li><img src="Zdjecia/basketball2.jpg" alt=""></li>
+			<li><img src="Zdjecia/basketball3.jpg" alt=""></li>
+		</ul>
+		</header>
+	
+		<nav> <!-- Nasze menu nawigacja -->
+			<ol>
+				<li><a  href="index.html">O mnie</a></li>
+				<li class="aktywny"><a>Statystyki</a>
+					<ul>
+						<li><a href="KNBA.html">KNBA</a></li>
+						<li><a href="U18.html">U18</a></li>
+						<li><a href="U20.html">U20</a></li>
+						<li><a href="3LM.html">3 Liga Mężczyzn</a></li>
+                        			<li><a href="DC35.html">Draft Camp 35</a></li>
+						<li class="aktywny">Mistrzostwa Polski</li>
+					</ul>
+				</li>
+				<li><a  href="stronafree.html">Highlights</a></li>
+				<li><a  href="galeria.html">Zdjecia</a></li>
+			</ol>
+		</nav>
+	
+		<section>
+			<article>
+                <img class="logo1" src="Zdjecia/Moje_logo.png" alt="Logo">
+                <img class="logo second" src="Zdjecia/Moje_logo.png" alt="logo">
+				<h1 class="pierwszy">Mistrzostwa Polski</h1>
+				<div class="statsy">
+                <a class href="Zdjecia/MPw.png" data-lightbox="Zdjęcia"><img class="statsy" src="Zdjecia/MP.png"></a>
+			    </div>
+				<p class="media">Obczaj moje media społecznościowe. Linki poniżej :)</p>
+				<a href="https://www.facebook.com/mateos0205" target="_blank"><img class="fb" src="Zdjecia/facebook.png" alt="fb" ></a><a href="https://www.instagram.com/maticzek52/?hl=pl" target="_blank"><img class=insta src="Zdjecia/instagram.png" alt="insta" ></a>
+			</article>
+
+		</section>
+	
+		<footer>Copyright 2020 Mateusz Łopatkiewicz</footer>
+	
+	</div>
+	
+	
+</body>
+

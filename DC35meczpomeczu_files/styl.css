@@ -1,0 +1,168 @@
+:root {
+	--kolortla: white;
+	--kolortekstu: black;
+	--kolor: orange;
+	--kolorlink: #d0592b;
+	--kolorlinkhover: orange;
+	--cien: -1px -1px 2px #d0592b, -1px 1px 2px #d0592b, 1px -1px 2px #d0592b, 1px 1px 2px #d0592b;
+	--kolorh: black;
+	
+	--szarycien: rgba(150,150,160,0.1);
+	--radius: 5px;
+}
+/* ustawienie do przymiarek offline */
+/*
+body {max-width:1200px} 
+.zawartoscglowna {max-width:280px}
+*/
+.test1200 {max-width:1200px} 
+.test280 {max-width:280px}
+/* ustawienie do przymiarek offline */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+#zawartosc, [id^='zawartosc'] {display:inline-block; width:100%}
+#zawartosc table, [id^='zawartosc'] table {border-spacing:0px; border:0px; margin:0px}
+#zawartosc, [id^='zawartosc'], [id^='zawartosc'] td, [id^='zawartosc'] th {font-family: "Open Sans", calibri, helvetica, sans-serif; font-size:1em; color:var(--kolortekstu); vertical-align:top; background-color:transparent; padding:1px; border:0px} 
+#zawartosc div, [id^='zawartosc'] div {display:inline-block; vertical-align:top}
+#zawartosc img, .zawartosc img {margin:1px; max-width:100%; padding:0px}
+h1, h2, h3, h4, h5, h6 {margin:0; line-height:1.2 !important}
+h1, h2, h3 {text-shadow:var(--cien); font-weight:bold; color:var(--kolorh)}
+#zawartosc h1, [id^='zawartosc'] h1 {font-size: 3.2em}
+h2 {font-size: 2.4em}
+h3 {font-size: 1.6em}
+h4 {font-size: 1.2em}
+h5 {font-size: 0.8em}
+h6 {font-size: 0.6em}
+a, a:visited, a:active, [id^='zawartosc'] a {color:var(--kolorlink); text-decoration:none; font-weight:bold}
+a:hover {color:var(--kolorlinkhover) !important; transition: color 0.6s}
+.divprzewij, #divtabstat {width:99%; overflow-x:auto; overflow-y:hidden}
+#tabstat {width:100%; border-spacing:0px}
+#tabstat .prawa {text-align:right; white-space:nowrap}
+#tabstat .num {text-align:center; font-weight:bold}
+#tabstat a img {height:50px !important}
+#tabstat tr.stat:nth-child(even) {background-color: var(--szarycien)}
+#tabstat td {padding:0px 2px; line-height:1.2}
+td.s5 {font-size:0.8em}
+.sumy {font-weight:bold !important}
+.proc, .srednie {font-style:italic}
+#zawfoto img {height:300px !important}
+#zawfotoslider {height:90px; max-width:250px; overflow-x:auto; overflow-y:hidden; white-space:nowrap;}
+#zawfotoslider img {height:70px !important; margin-right:2px !important}
+.trek {margin:5px; border:1px solid var(--kolorlink); text-align:center}
+.trek div {margin:5px}
+.tnagr img {height:70px}
+.listalinkzaw, .listalinkmecz {display:inline-block; vertical-align:top; font-weight:normal}
+.listalinkzaw {width:200px; }
+.listalinkmecz {width:300px; }
+.nowrap {white-space:nowrap}
+.zawartoscglowna {max-width:300px; text-align:center; max-height:700px; overflow-y:auto}
+.zawartoscglowna a, .zawartoscglowna span {display:block}
+.zawartoscglowna * {vertical-align:middle; text-align:center; padding:0px}
+#zawartosctab img {height:36px !important}
+#zawartoscmvp img, #zawartoscwystepy img {height:40px !important; display:inline-block !important}
+#zawartoscostagora, #zawartoscostagorahor {overflow-x:auto; overflow-y:hidden; white-space:nowrap; width:100%; font-size:0.9em}
+#zawartoscostagora img, #zawartoscostagorahor img {height:25px !important} 
+#zawartoscostagora div span, #zawartoscostagorahor div span {font-size:16px; vertical-align:top}
+#zawartoscostagora h5 {text-align:center; font-weight:bold}
+#zawartoscwystepy div div {vertical-align:middle}
+.divgoradata {font-size:12px; line-height:1.2; color:white; text-align:center; opacity:0.75; font-weight:bold}
+#tabtab td {text-align:center; padding: 0px 4px; vertical-align:middle}
+.tdpasek {min-width:60px;}
+.tdpasek img {height:1.2em !important; margin:0px !important}
+th {font-size:0.75em !important}
+#yt {border:0px; width:100%; height:320px}
+tr {border:0px}
+.kwarty {width:initial; margin:3px !important; overflow-x:auto; overflow-y:hidden; white-space:nowrap; /*max-width:100%;*/}
+.kwarty td {border:1px solid var(--kolorlink); text-align:center; padding:5px; min-width:4em; font-weight:bold; vertical-align:middle; line-height:1.1}
+.listateam {width:280px; margin:2px}
+#zawtab {padding:5px}
+.tablider, #zawartoscostagora div, #zawartoscostagorahor div {width:initial; max-width:initial !important; display:inline-block; background-color: var(--szarycien);  margin:2px !important; border-radius:var(--radius); padding:4px; vertical-align:middle}
+.tablider {max-width:300px; }
+.tablider td {padding:0px 5px; vertical-align:middle; line-height:1.2}
+#td0 div {vertical-align:bottom;}
+#td1 div {vertical-align:top;}
+.zeropad td, .zeropad {padding:0px !important}
+.szary {background-color: var(--szarycien)}
+#tabwykres {background-color:white }
+sup {font-size:0.5em; vertical-align:top !important}
+.tiebreaki, .lp {font-size:0.85em !important}
+.wykreskwartadiv {height:12px !important; border:1px solid var(--kolorlink);}
+.inline {display: inline-block !important}
+.blok {display: block !important}
+.tdnagl {vertical-align: middle}
+.tdnagl * {margin-right:5px; vertical-align: middle}
+.divokragly {width:initial; overflow-x:visible}
+/*
+@import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+body, div, td {font-family: "Exo", calibri, helvetica, sans-serif; font-size:11pt; color:var(--kolor); vertical-align:top}
+body.noscr {overflow:hidden}
+body.alfa {line-height:1.2em}
+body.alfa a {width:200; display:inline-block; font-size:1em}
+body.term span {width:250; display:inline-block; margin-left:30;white-space:nowrap;}
+body {margin:0}
+
+img {vertical-align:top}
+
+a, a:visited, a:active {color:#ff5500; text-decoration:none; font-weight:bold}
+a:hover {color:#ff9b1f}
+a.refr {}
+
+h1, h2 , h3, .ostalw a {color:black; text-shadow:-1px -1px 2px #ff5500, -1px 1px 2px #ff5500, 1px -1px 2px #ff5500, 1px 1px 2px #ff5500}
+h4, h5, h6 {font-weight:normal}
+h1 {font-size:4em}
+h2 {font-size:2.5em}
+h3 {font-size:2em}
+h4 {font-size:1.5em}
+h5 {font-size:.8em}
+h6 {font-size:.6em}
+.zawfoto, .zawtab {display:inline-block; padding-bottom:5;display: -moz-inline-stack;}
+.zawtab {vertical-align:top; padding-left:15}
+.zawfoto img {height:250}
+
+.xzaw {border-spacing:0; width:100%}
+.xzaw tbody {height:auto; overflow-x:scroll}
+.xzaw td {text-align:right; vertical-align:middle; padding:1 5;white-space:nowrap;}
+.xzaw td.tdf {}
+.xzaw td.s5 {font-size:0.6em}
+.xzaw td.nag img {width:initial; height:initial}
+
+.xzaw {background: white}
+.xzaw tr:nth-child(even) {background: #f8f8f8}
+
+.xzaw td.lewa, .xzaw td.nazw, .xzaw td.nag {text-align:left;white-space:normal; min-width:75}
+.xzaw td.nazw {max-width:160}
+.xzaw td.nagl {white-space:normal; text-align:center}
+.xzaw td img {height:1.2em}
+.nagl td {font-size:.7em; vertical-align:bottom}
+.trsezon td {font-size:1.2em; text-align:left;white-space:nowrap;vertical-align:middle}
+.trsezon font {font-size:1.7em; font-weight:bold; padding:1 13}
+.trsezon td img {height:40}
+
+.sumy td {font-weight:bold; vertical-align:top}
+.srednie td {font-style:italic}
+.kwar td {width:60; text-align:center}
+
+table.lid {display:inline-block; vertical-align:top; margin:0 5 10 0}
+table.lid td {padding:0 8 0 0}
+
+.xmvp {border-spacing:0; width:90%}
+.xmvp td {text-align:center; vertical-align:middle; font-size:0.9em; min-width:23}
+.xmvp img {height:40}
+.xmvp td {padding:0}
+
+span.legenda {font-size:7pt}
+
+.trek {vertical-align:top; border:1px solid silver; margin:5; display:inline-block}
+.trek td, .trek th {text-align:center; width:3em}
+
+.spacer {width:50; height:1px}
+
+.ostahrefr {display:inline-block; vertical-align:middle}
+.ostah {display:inline-block; font-size:20px; vertical-align:middle; margin-right:7}
+.ostah, table.lid { background-color:rgb(248,248,248); border-radius:5px; padding:3px}
+.ostah img {height:20}
+
+.ostalw {width:100%; text-align:center}
+.ostalw a {text-decoration:none; font-size:22pt; line-height:1.2em}
+.ostalw img {width:80; vertical-align:bottom}
+
+*/
